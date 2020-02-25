@@ -555,11 +555,247 @@
 
 
     Lambda
-    
+        람다식은 함수형 인터페이스로 참조할 수 있다.
+        함수형 인터페익스에는 오직 하나의 추상메서드만 정의되어 있어야 한다.
+        그래야 람다식과 인터페이스의 메서드가 1:1로 연결될 수 있기 때문이다.
+        @FunctionalIntterface를 붙이면 컴파일러가 함수형 인터페이스를 올바르게 작성하였는지 확인해주므로 반드시 붙이자.
+
+        함수형 인터페이스를 메서드의 매개변수 또는 반환타입으로 지정하여 람다식을 주고 받을 수 있다.
+
+        람다식 내에서 참조하는 지역변수는 final이 붙지 않았어도 상수로 간주한다. 해당 지역변수는 람다식 내에서나 다른 어느 곳에서도 값을 변경할 수 없다.
+        반면, 인스턴스 변수는 변경할 수 있다.
+
+        java.util.function
+            java.lang.Runnable      / void run()
+            Supplier<T>             / T get()
+            Consumer<T>             / void accept(T t)
+            Function<T,R>           / R apply(T t)
+            Predicate<T>            / boolean test(T t)
+
+            매개변수가 2개인 함수형 인터페이스
+            BiConsumer<T,U>         / void accept(T t, U u)
+            BiFunction<T,U,R>       / R apply(T t, U u)
+            BiPredicate<T,U>        / boolean test(T t, U u)
+            
+            3개 이상의 매개변수가 필요한 경우에는 직접 만들어서 사용해야 한다.
+            @FunctionalIntterface
+            interface TriFunction<T,U,V,R> {
+                R apply(T t, U u, V v);
+            }
+
+            UnaryOperator<T>        / T apply(T t)
+            BinaryOperator<T>       / T apply(T t, T t)
+
+            기본형을 사용하는 함수형 인터페이스
+            DoubleToIntFunction     / int apply(double d)
+            ToIntFunction           / int applyAsInt(T value)
+            intFunction             / R apply(int value)
+            ObjIntConsumer          / void accpet(T t, int i)
+
+        Function의 합성과 Predicate의 결합
+            java.util.function 패키지의 함수형 인터페이스에는 추상메서드 외에도 default 메서드와 static 메서드가 정의되어 있다.
+                Function
+                    default <V> Function<T,V> andThen(Function<? super R, ? extends V> after)
+                    default <V> Function<V,R> compose(Function<? super V, ? extends T> before)
+                    static <T> Function<T,T> identity()
+
+                Predicate
+                    default Predicate<T> and(Predicate<? super T> other)
+                    default Predicate<T> or(Predicate<? super T> other)
+                    default Predicate<T> negate()
+                    static <T> Predicate<T> isEqual(Object targetRef)
+
+        메서드 참조
+            하나의 메서드만 호출하는 람다식은 '클래스이름::메서드이름' 또는 '참조변수::메서드이름'으로 바꿀 수 있다. 
+            (생성자를 호출하는 람다식도 메서드 참조로 변환할 수 있다. () -> new MyClass() / MyClass::new
+            매개변수의 개수에 따라 알맞은 함수형 인터페이스를 사용하면 된다. (i, s) -> MyClass::new)
+            
+                static 메서드 참조: ClassName::method
+                인스턴스 메서드 참조: ClassName::method
+                특정 객체 인스턴스 메서드 참조: obj::method
 
     Stream
+        스트림은 데이터 소스를 변경하지 않는다. 읽거나 새로운 컬렉션이나 배열을 반환할 뿐.
+        스트림은 1회용이다. Iterator로 컬렉션의 요소를 모두 읽고 나면 다시 사용할 수 없는 것처럼 스트림도 한번 사용하면 닫혀서 다시 사용할 수 없다.
+        오토박싱&언박싱의 비효율을 줄이기 위해 기본형을 다루는 스트림이 있다 (IntStream, LongStream, DoubleStream)
+        스트림은 기본적으로 sequential하다. 병렬 처리하기 위해서는 parallel 메서드를 호출하면 된다. (parallet, sequential은 새로운 스트림을 생성하는 것이 아니라 스트림의 속성을 변경할 뿐이다)
+
+        중간연산: 연산 결과가 스트림인 연산, 스트림에 연속해서 중간연산할 수 있음 (lazy 연산; 최종연산 전까지는 중간연산은 수행되지 않는다.)
+        최종연산: 연산 결과가 스트림이 아닌 연산, 스트림의 요소를 소모하므로 단 한번만 가능
+
+        Stream 만들기
+            컬렉션: Colllection.stream()
+            배열: Stream.of(T... value), Stream.of(T[]), Arrays.stream(T[]), Arrays.stream(T[] array, int startInclusive, int endExclusive)
+            기본형 스트림
+                IntStream.of(int... value), IntStream.of(int[]), Arrays.stream(int[]), Arrays.stream(int[] array, int startInclusive, int endExclusive)
+                IntStream.range(int begin, int end)
+                IntStream.rangeClosed(int begin, int end) // 경계포함
+                new Random().ints().limit(5) // ints()는 무한 스트림이므로 스트림 크기를 제한해주어야 한다.
+                new Random().ints(5)
+                new Random().ints(1,5) // 난수범위 1,2,3,4
+            람다식 (무한 스트림)
+                Stream.iterate(0, n -> n+2) // 0, 2, 4, 6, ... 이전 결과를 다음 계산에 사용
+                Stream.generate(Math::random) // 이전 결과를 다음 계산에 사용하지 않음
+            
+        Stream 연결
+            Stream.concat(Stream.of(...), Stream.of(...))
+
+        Stream 중간연산
+            skip() // 건너뛰기
+            limit() // 자르기
+            filter()
+            distinct()
+            sorted()
+            map()
+            peek() // 조회. 스트림의 요소를 소모하지 않으므로 연산 사이에 여러 번 끼워 넣어도 문제되지 않는다.
+            mapToInt(), maptoLong(), mapToDouble() // 기본형 스트림으로 변환
+            sum(), average(), max(), min(), summaryStatistics()
+            mapToObj(), boxed()
+            flatMap()                
+                1.
+                Stream<String[]> arrStrm = Stream.of(
+                    new String[]{"a", "b", "c"},
+                    new String[]{"d", "e", "f"}
+                );
+
+                Stream<Stream<String>> strmStrm = arrStrm.map(Arrays::stream);
+                Stream<String> strStrm = arrStrm.flatMap(Arrays::stream);
+
+                2.
+                String[] lineArr = {
+                    "Believe or not It is true",
+                    "Do or do not There is no try",
+                };
+
+                Stream<String> strm = Arrays.stream(lineArr);
+                Stream<Stream<String>> strmStrm = strm.map(line -> Stream.of(line.split(" ")));
+                Stream<String> strStrm = strm.flatMap(line -> Stream.of(line.split(" ")));
+
+                3.
+                Stream<String> strStrm = Stream.of("a","b","c");
+                Stream<String> strStrm2 = Stream.of("d","e","f");
+                Stream<Stream<String>> strmStrm = Stream.of(strStrm, strStrm2);
+                Stream<String> strm = strmStrm
+                    .map(s -> s.toArray(String[]::new))
+                    .flatMap(Arrays::stream);
+                
+        Stream 최종연산
+            void forEach(Consumer<? super T> action)
+            boolean allMatch(Predicate<? super T> predicate)
+            boolean anyMatch(Predicate<? super T> predicate)
+            boolean noneMatch(Predicate<? super T> predicate)
+            Optional<T> findFirst()
+            Optional<T> findAny() // 병렬 스트림인 경우 findAny를 사용해야 한다.
+            
+            long count()
+            Optional<T> max(Comparator<? super T> comparator)
+            Optional<T> min(Comparator<? super T> comparator)
+
+            count, max, min 보다 reduce(), collect()를 보통 더 많이 사용.
+            Optional<T> reduce(BinaryOperator<T> accumulator) // 처음 두 요소로 연산한 결과를 가지고 다음 요소와 연산한다.
+            T reduce(T identity, BinaryOperator<T> accumulator) // 초기값과 스트림의 첫번째 요소를 연산의 시작으로 한다. 스트림의 요소가 하나도 없는 경우 초기값을 반환하므로 반환 타입이 Optional<T>가 아닌 T이다.
+            U reduce(U identity, BinaryOperator<U,T,U> accumulator, BinaryOperator<U> combiner) // 병렬 스트림 용도
+
+        collect()
+            collect() 스트림의 최종연산, 매개변수로 컬렉터를 필요로 한다. (sort할 때 Comparator가 필요한 것처럼 collect할 때 Collector가 필요하다)
+            Collector 인터페이스, 컬렉터는 이 인터페이스를 구현해야한다.
+            Collectors 클래스, static 메서드로 미리 작성된 컬렉터를 제공한다.
+
+            스트림을 컬렉션과 배열로 반환
+                toList, toSet
+                toMap (키와 값을 쌍으로 저장해야하므로 객체의 어떤 필드를 키로 사용할지와 값으로 사용할지를 지정해줘야 함; toMap(Product::getId, Function.identity()))
+                toCollection (생성자 참조를 매개변수로 넣어줘야 함; toCollection(ArrayList::new))
+                toArray (생성자 참조를 매개변수로 넣어줘야 함; toArray(Student[]::new))
+
+            통계
+                counting(), summingInt(), averagingInt(), maxBy(), minBy()
+            
+            리듀싱
+                reducing()
+            
+            문자열 결합
+                joining()
+
+            그룹화와 분할
+                partitioningBy()
+                    Collector partitioningBy(Predicate predicate)
+                    Collector partitioningBy(Predicate predicate, Collector downstream)
+                
+                    partitioningBy가 빠르다. Predicate으로 가능하면 partitioningBy를 사용하자.
+                    그룹화와 분할의 결과는 Map에 담긴다.
+
+                    Map<Boolean, List<Student>> studentsBySex = stuStream.collect(partitioningBy(Student::isMale));
+                    List<Student> maleStudents = stuBySex.get(true);
+                    List<Student> femaleStudents = stuBySex.get(false);
+
+                    Map<Boolean, List<Student>> studentsBySex = stuStream.collect(partitioningBy(Student::isMale, counting()));
+                    studentsBySex.get(true); // 남학생 수
+                    studentsBySex.get(false); // 여학생 수
+
+                    Map<Boolean, Optional<Student>> topScoreBySex = stuStream.collect(partitioningBy(Student::isMale, maxBy(comparingInt(Student::getScore))));
+                    topScoreBySex.get(true); // 최고점수를 가진 남학생
+                    topScoreBySex.get(false); // 최고점수를 가진 여학생
+
+                    Map<Boolean, Map<Boolean, List<Student>>> failedStuBySex = stuStream.collect(
+                        partitioningBy(Student::isMale,
+                            partitioningBy(s -> s.getScore() < 150)
+                        )
+                    );
+                    List<Student> failedMaleStu = failedStuBySex.get(true).get(true);
+                    List<Student> failedFemaleStu = failedStuBySex.get(false).get(true);
+
+                groupingBy()
+                    Collector groupingBy(Function classifier)
+                    Collector groupingBy(Function classifier, Collector downstream)
+                    Collector groupingBy(Function classifier, Supplier mapFactory, Collector downstream)
+                    
+                    Map<Integer, List<Student>> stuByClassRoom = stuStream.collect(groupingBy(Student::getClassRoom)); // 기본적으로 List<T>에 담는다.
+                    Map<Integer, List<Student>> stuByClassRoom = stuStream.collect(groupingBy(Student::getClassRoom, toList()));
+                    Map<Integer, HashSet<Student>> stuByClassRoom = stuStream.collect(groupingBy(Student::getClassRoom, toCollection(HashSet::new)));
+                    Map<Student.Level, Long> stuByLevel = stuStream.collect(groupingBy(s -> {
+                        if(s.getScore() >= 200) return Student.Level.HIGH;
+                        else if(s.getScore() >= 100) return Student.Level.MID;
+                        else return Student.Level.LOW;
+                    }, counting()));
+                    Map<Integer, Map<Integer, List<Student>>> stuByHakAndBan = stuStream
+                        .collect(groupingBy(Student::getHak,
+                            groupingBy(Student::getBan)
+                        ));
 
 
+                    
+                
+
+
+
+    Optional
+        pulbic final class Optional<T> {
+            private final T value;
+        }
+
+        반복된 if문 체크를 Optional에 정의된 메서드로 대체하여 간단히 처리 가능
+
+        Optional 생성
+            of, ofNullable: 참조변수의 값이 null일 가능성이 있으면, ofNullable을 사용해야 한다. of를 사용하면 NPE.
+            empty: 참조변수를 기본값으로 초기화할 때. 내부적으로 null을 저장하고 있다.
+
+        Optional 값처리
+            get, orElse: 저장된 값을 가져올 때. 값이 null일 때는, NoSuchElementException이 발생한다. 이 때를 대비해서 orElse()로 값을 지정할 수 있다.
+                Optional<String> optVal = Optinal.of("abc");
+                String str1 = optVal.get();
+                String str2 = optVal.orElse(""); // optVal에 저장된 값이 null일 때는 ""을 반환
+            orElseGet: orElse 변형으로 null을 대체할 값을 반환하는 람다식을 지정할 수 있음
+            orElseThrow: orElse 변형으로 null일 대 지정된 예외를 발생시킬 수 있음
+
+            filter, map, flatMap
+                map의 결과가 Optional<Optional<T>>일 때, flatMap을 사용하면 Optional<T>를 결과로 얻는다.
+                만일 Optional 객체의 값이 null이면, 이 메서드들은 아무 일도 하지 않는다.
+            
+            isPresent
+                Optional 객체의 값이 null이면 false를, 아니면 true를 반환한다.
+            
+            ifPresent
+                값이 있으면 주어진 람다식을 실행하고, 없으면 아무 일도 하지 않는다.
 
     Thread
 
