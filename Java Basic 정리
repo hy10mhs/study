@@ -5,15 +5,6 @@
 
         // 멤버변수 외에는 모두 지역변수
     }
-
-JVM 메모리구조
-    1. Method Area (클래스 변수)
-        프로그램 실행 중 어떤 클래스가 사용되면, JVM은 해당 클래스의 클래스파일(*.class)을 읽어서 클래스 데이터를 이곳에 저장한다.
-    2. Call Stack (지역 변수)
-        메서드가 호출되면 호출된 메서드를 위한 메모리가 할당되며, 메서드가 작업을 마치면 할당되었던 메모리공간은 반환되어 지워진다.
-    3. Heap (인스턴스 변수)
-        생성되는 인스턴스는 모두 이곳에 저장된다.
-
 메서드
     1. parameter(부모) >= argument. 반환타입(부모) >= 반환값 // 다형성
     2. static 메서드는 같은 클래스 내 인스턴스 메서드를 호출할 수 없다
@@ -61,9 +52,9 @@ JVM 메모리구조
     
     멤버변수의 초기화 방법
         1. 명시적 초기화 (선언과 동시에 초기화; int door = 4 or Engine e = new Engine())
-        2. 생성자
-        3. 초기화 블럭 (인스턴스 초기화 블럭 { /* 메서드처럼 조건, 반복, 예외처리 등 자유롭게 사용 가능 */ } 또는 클래스 초기화 블럭 static {})
-
+        2. 초기화 블럭 (인스턴스 초기화 블럭 { /* 메서드처럼 조건, 반복, 예외처리 등 자유롭게 사용 가능 */ } 또는 클래스 초기화 블럭 static {})
+        3. 생성자
+        
     멤벼변수 초기화 시기와 순서
         1. 클래스 변수
             시점: 클래스가 처음 로딩될 때 단 한번
@@ -147,8 +138,7 @@ import
     업캐스팅: Parent parent = child (O)
     다운캐스팅: Child child = parent (X) 형변환 생략불가
     
-    instanceof
-        어떤 인스턴스의 instanceof 결과가 true인 것은 검사한 타입으로 형변환이 가능하다는 것을 의미한다.
+    어떤 인스턴스의 instanceof 결과가 true인 것은 검사한 타입으로 형변환이 가능하다는 것을 의미한다.
 
     조상 클래스의 메서드를 자손 클래스가 오버라이딩한 경우 참조변수의 타입에 관계없이 실제 인스턴스의 메서드(오버라이딩된 메서드)가 호출되지만,
     멤버변수와 static 메서드는 참조변수의 타입에 영향을 받는다. 인스턴스 메서드만 영향을 받지 않는다
@@ -375,8 +365,7 @@ Collection Framework
             그 대신 배열이나 LinkedList에 비해 검색과 정렬기능이 뛰어나다.
 
     Map - 순서가 없다. 키는 중복을 허용하지 않고 값은 중복을 허용. 이미 동일한 키가 있는 경우 덮어 씌움 (not extends Collection)
-        HashMap 검색에 관한 대부분의 경우 HashMap이 뛰어나다
-        TreeMap 단, 범위검색이나 정렬이 필요한 경우에는 TreeMap을 쓰자
+        검색에 관한 대부분의 경우 HashMap이 뛰어나다. 단, 정렬/범위검색이 필요한 경우에는 TreeMap을 쓰자
     
     Vector, Hashtable은 쓰지말자.. 개선된 ArrayList, HashMap을 쓰자.
     Collections Arrays가 배열에 관련된 메서드를 제공하는 것처럼, Collections는 컬렉션과 관련된 메서드를 제공한다.
@@ -406,9 +395,6 @@ Generics
             b.setItem(new Object());
 
         제약
-            T의 자료형이 결정되는 시점은 지네릭 클래스의 인스턴스가 생성될 때. 인스턴스 생성 전에 접근할 수 있는 것들은 사용 불가.
-            (runtime + 인스턴스 생성 => T 사용 가능)
-
             static 멤버
                 모든 객체에 동일하게 동작해야하는 static 멤버에 타입 변수 T를 사용할 수 없다.
                 static 멤버는 parameterized type과 관계없이 동일한 것이어야 하기 때문이다.
@@ -463,13 +449,13 @@ Lambda
     해당 지역변수는 람다식 내에서나 다른 어느 곳에서도 값을 변경할 수 없다. 반면, 인스턴스 변수는 변경할 수 있다
 
     java.util.function
-        매개변수 1개 이하
+        매개변수 0개
             java.lang.Runnable      void run()
             Supplier<T>             T get()
+        매개변수 1개
             Consumer<T>             void accept(T t)
             Function<T,R>           R apply(T t)
             Predicate<T>            boolean test(T t)
-
         매개변수 2개
             BiConsumer<T,U>         void accept(T t, U u)
             BiFunction<T,U,R>       R apply(T t, U u)
