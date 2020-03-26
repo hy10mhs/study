@@ -6,7 +6,7 @@ Variable
     }
 
 Method
-    1. 매개변수타입/반환타입으로 업캐스팅 가능. 기본형 값복사, 참조형 주소복사
+    1. 매개변수타입/반환타입으로 업캐스팅 가능. 기본형 값복사. 참조형 주소복사.
     2. static 메서드는 인스턴스 멤버 사용 불가
 
 Overloading
@@ -78,14 +78,12 @@ Inheretance
         Object 클래스를 제외한 모든 클래스의 생성자는 첫 줄에 반드시 자신의 다른 생성자 또는 조상의 생성자를 호출해야 한다. 그렇지 않으면 컴파일러는 생성자 첫 줄에 super()를 자동으로 추가한다.
 
 package
-    모든 클래스는 반드시 하나의 패키지에 속해야 한다.
-    한 소스파일에는 첫번째 문장으로 한 패키지 선언만 허용.
+    모든 클래스는 반드시 단 하나의 패키지에 속해야 하며, 소스파일 첫번째 문장으로 선언.
     패키지를 지정하지 않은 클래스는 자동으로 이름없는 패키지에 속하게 된다.
 
 import
     import문은 프로그램 성능에 전혀 영향 X. 컴파일 시간이 아주 조금 더 걸릴 뿐.
-    *을 사용하는 것이 하위 패키지의 클래스까지 포함하는 것은 아니다.
-    java.util.*, java.text.* != java.*
+    * 는 하위 패키지 모든 클래스를 포함하지 않는다 (java.util.*, java.text.* != java.*)
     같은 패키지 내 클래스들은 import문을 지정하지 않고도 패키지 명을 생략할 수 있다.
     import static으로 static 멤버를 호출할 때 클래스 이름을 생략할 수 있다.
 
@@ -116,7 +114,7 @@ modifier
         클래스: 추상메서드가 있음을 의미
         메서드: 추상메서드
 
-        abstract은 static, final, private을 함께 쓰지 않는다
+        abstract은 static, final, private과 함께 쓰지 않는다
     
 Polymorphism
     업캐스팅: Parent parent = child (O)
@@ -128,13 +126,10 @@ Polymorphism
     멤버가 중복 정의된 경우
     "인스턴스 메서드" => Child
     멤버변수, static 메서드 => Parent
-
-Abstract class
-    추상클래스로는 인스턴스 생성 불가.
-    일부만 구현한다면 자손 클래스도 추상클래스로.
+    (멤버변수, static 메서드는 참조변수 타입을 따르고, 인스턴스 메서드는 오버라이딩 메서드를 따른다)
 
 Interface
-    일종의 추상클래스.
+    일종의 추상클래스 (인스턴스 생성 불가. 일부만 구현한다면 자손 클래스도 추상클래스)
     추상클래스와 달리 추상메서드와 상수만 멤버로 가질 수 있다.
     
     interface 인터페이스이름 {
@@ -148,12 +143,11 @@ Interface
     }
     
     인터페이스의 장점
-        1. 개발시간 단축: 인터페이스를 구현한 클래스가 작성될 때까지 기다리지 않고도 양쪽에서 동시에 개발을 진행할 수 있다.
-        2. 클래스들 간 관계를 맺어줄 수 있다: 상속관계에 있지 않고, 같은 조상 클래스를 가지고 있지 않은 클래스들 간 하나의 인터페이스를 공동 구현하도록 함으로써 관계를 맺어줄 수 있다.
-            즉, 상속트리를 하나 더 만들 수 있다!!!!!!!!!!
-            [GroundUnit -> Marine, SCV, Tank]
-            [AirUnit -> DropShip]
-            [Repairable -> SCV, Tank, DropShip]
+        1. 개발시간 단축: 구현 클래스가 작성될 때까지 기다리지 않고 양쪽에서 동시에 개발 진행 가능
+        2. 상속트리 추가
+            [SCV, Tank, Marine]     extends     [GroundUnit]
+            [DropShip]              extends     [AirUnit]
+            [SCV, Tank, DropShip]   implements  [Repairable]
         3. 클래스간 직접적인 관계를 인터페이스를 이용해서 간접적인 관게로 변경하면, 한 클래스의 변경이 다른 클래스에 영향을 미치지 않게 할 수 있다.
             단, 구현 클래스를 제공하는 쪽에서는 인터페이스를 구현해야 하고, 제공받는 쪽에서도 인터페이스를 사용해야 한다.
 
@@ -241,20 +235,19 @@ Exception
     '에러'는 OutOfMemeoryError, StackOverflowError와 같이 일단 발생하면 복구할 수 없는 심각한 오류이고
     '예외'는 발생하더라도 수습될 수 있는 비교적 덜 심각한 것이다.
 
-    에외 클래스의 계층구조
-        Object   -> Throwable   -> Exception    -> IOException
-                                                -> ClassNotFoundException
-                                                -> FileNotFoundException
-                                                -> DataFormatException 
-                                                -> ...
-                                                -> RuntimeException         -> ArithmeticException
-                                                                            -> ClassCastExcepion
-                                                                            -> NullPointerException
-                                                                            -> ...
-                                                                            -> IndexOutOfBoundsException
-                                -> Error        -> OutOfMemeoryError
-                                                -> ...
-                                                -> StackOverflowError
+    Object  -> Throwable    -> Exception    -> IOException
+                                            -> ClassNotFoundException
+                                            -> FileNotFoundException
+                                            -> DataFormatException 
+                                            -> ...
+                                            -> RuntimeException         -> ArithmeticException
+                                                                        -> ClassCastExcepion
+                                                                        -> NullPointerException
+                                                                        -> ...
+                                                                        -> IndexOutOfBoundsException
+                            -> Error        -> OutOfMemeoryError
+                                            -> ...
+                                            -> StackOverflowError
                                 
     RuntimeException
         프로그래머 실수
@@ -271,7 +264,7 @@ Exception
     예외가 발생하지 않은 경우 try -> finally
 
 Collection Framework
-    List    - 순서가 있다. 중복 허용 O
+    List    - 순서 O / 중복 허용 O
         ArrayList
             Object 배열에 순차 저장. 공간이 없으면 새로운 배열에 복사 후 저장. 저장 개수를 고려해서 여유있는 크기로 생성하는 것이 좋다 (단, 너무 큰 배열은 공간낭비)
             배열 중간에 위치한 객체를 추가하거나 삭제하는 경우 데이터를 이동시켜줘야 하므로 시간이 오래 걸린다. 순차적으로 저장하거나 마지막 요소부터 삭제하는 것은 빠르다 (단, 배열 공간이 충분하다는 전제)
@@ -329,33 +322,32 @@ Collection Framework
 
             역순으로 만들고 싶은 경우 compareTo 결과에 -1을 곱하는 compare 메서드를 만들자.
 
-    Set     - 순서가 없다. 중복 허용 X => 저장 실패하고 false 반환
+    Set     - 순서 X / 중복 허용 X => 저장 실패하고 false 반환
         HashSet
             load factor는 저장공간이 가득 차기 전에 미리 용량을 확보하기 위한 것으로 기본값은 0.75이며, 저장공간이 75%가 채워졌을 때 용량이 두 배로 늘어난다.
-            새로운 요소를 추가하기 전에 저장된 요소와 같은 것인지 판별하기 위해 equals(), hashCode()를 호출하기 때문에 eqauls()와 hashCode()를 목적에 맞게 오버라이딩해야 한다.
             
+            새로운 요소를 추가하기 전에 저장된 요소와 같은 것인지 판별하기 위해 equals(), hashCode()를 호출하기 때문에 eqauls()와 hashCode()를 목적에 맞게 오버라이딩해야 한다.
             hashCode() 다음 조건을 만족해야 한다.
-                1. equals 메서드에 사용된 멤버변수의 값이 바뀌지 않는 한 인스턴스의 해시코드는 변하지 않아야 한다.
+                1. equals 메서드에 사용된 멤버변수의 값이 바뀌지 않는 한 인스턴스의 해시코드는 변하지 않아야 한다. (해시코드 값이 바뀌면 equals에 사용되는 멤버변수의 값이 바뀌어야 한다)
                 2. 두 객체의 equals 결과가 true면 hashCode가 같아야 하고, false면 같거나 달라도 됨.
                     그러나, 컬렉션 성능(해싱)을 향상시키기 위해서는 다른 값을 반환하는 것이 좋다
                     (해시코드가 같다고 해서 equals 결과가 true인 것은 아니다.)
 
-            hashCode는 1.8부터 추가된 hash() 메서드를 사용하자. Objects.hash(인스턴스 변수들...)
-            String 클래스는 문자열의 내용을 해시코드로 만들어 내어 내용이 같은 문자열에 대한 해시코드는 같다.
-            반면 Object 클래스는 객체 주소로 해시코드를 만들어 내어 실행할 때마다 해시코드 값이 바뀔 수 있다.
+            String 클래스는 내용이 같은 문자열에 대한 해시코드는 같다.
+            Object 클래스는 객체 주소로 해시코드를 만들어 내어 실행할 때마다 해시코드 값이 바뀔 수 있다.
             
         TreeSet
             이진 검색 트리(레드블랙트리)를 사용.
-            정렬/검색/범위검색에 높은 성능을 보이는 자료구조.
+            정렬/범위검색에 높은 성능을 보이는 자료구조.
             
             추가시 저장위치를 찾아야 하고 삭제시 트리 일부를 재구성해야하므로 LinkedList보다 추가/삭제에 대한 비용이 크다.
             그 대신 배열이나 LinkedList에 비해 검색과 정렬기능이 뛰어나다.
 
-    Map     - 순서가 없다. 키는 중복 X => 덮어 씌움 (not extends Collection)
+    Map     - 순서 X / 키는 중복 X => 덮어 씌움 (not extends Collection)
         검색에 관한 대부분의 경우 HashMap이 뛰어나다. 단, 정렬/범위검색이 필요한 경우에는 TreeMap을 쓰자
     
     Vector, Hashtable은 쓰지말자.. 개선된 ArrayList, HashMap을 쓰자.
-    Collections Arrays가 배열에 관련된 메서드를 제공하는 것처럼, Collections는 컬렉션과 관련된 메서드를 제공한다.
+    Arrays가 배열에 관련된 메서드를 제공하는 것처럼, Collections는 컬렉션과 관련된 메서드를 제공한다.
     
 Generics
     다양한 타입의 객체들을 다루는 메서드에 사용
@@ -409,7 +401,7 @@ Generics
             <?> 제한 없음. <? extends Object>와 동일
 
     지네릭 메서드
-        지네릭 클랙스에 정의된 타입 매개변수와 지네릭 메서드에 정의된 타입 매개변수는 별개.
+        지네릭 클래스에 정의된 타입 매개변수와 지네릭 메서드에 정의된 타입 매개변수는 별개.
         같은 타입 문자 T를 사용한다해도 같은 것이 아니라는 것에 주의하자.
 
     지네릭 타입의 형변환
@@ -623,10 +615,11 @@ Stream
                             else return Student.Level.LOW;
                         }, counting()));
 
-                        Map<Integer, Map<Integer, List<Student>>> stuByHakAndBan = stuStream
-                        .collect(groupingBy(Student::getHak,
-                            groupingBy(Student::getBan)
-                        ));
+                        Map<Integer, Map<Integer, List<Student>>> stuByHakAndBan = stuStream.collect(
+                            groupingBy(Student::getHak,
+                                groupingBy(Student::getBan)
+                            )
+                        );
 
 Optional
     pulbic final class Optional<T> {
@@ -645,13 +638,15 @@ Optional
 
         filter, map, flatMap
             map의 결과가 Optional<Optional<T>>일 때, flatMap을 사용하면 Optional<T>를 결과로 얻는다.
-            만일 Optional 객체의 값이 null이면, 이 메서드들은 아무 일도 하지 않는다.
+            만일 값이 null이면, 이 메서드들은 아무 일도 하지 않는다.
         
         isPresent
-            Optional 객체의 값이 null이면 false를, 아니면 true를 반환한다.
+            값이 있으면 true
+            값이 null이면 false
         
         ifPresent
-            값이 있으면 주어진 람다식을 실행하고, 없으면 아무 일도 하지 않는다.
+            값이 있으면 람다식 실행
+            값이 null이면 아무 일도 하지 않음
 
 Thread
     프로세스: 실행 중인 프로그램. OS로부터 실행에 필요한 자원(메모리)을 할당받아 프로세스가 실행됨
@@ -856,5 +851,3 @@ Thread
 
     생성자 또는 메서드를 사용하지 못하게 하려는 경우 (ex: abstract 클래스의 메서드 일부를 구현하면서 구현하지 않은 일부 메서드를 사용 못하게 막으려는 경우)
     호출하는 쪽에서 제대로 동작하지 않는 이유를 알 수 있도록 메서드에서 에외를 던져주자 (ListIterator의 remove 메서드)
-
-
